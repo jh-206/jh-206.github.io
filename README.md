@@ -27,3 +27,20 @@ The website publishes the compiled PDF at `assets/cv/Jonathon-Hirschi-CV.pdf`.
 3. Copy the PDF to `assets/cv/Jonathon-Hirschi-CV.pdf`.
 4. Run `python3 scripts/render_site.py`.
 5. Commit and push the website changes.
+
+Manual compile and copy commands:
+
+```sh
+mkdir -p /private/tmp/jh-cv-build
+
+latexmk -pdf \
+  -interaction=nonstopmode \
+  -halt-on-error \
+  -outdir=/private/tmp/jh-cv-build \
+  /Users/hirschij/Documents/Projects/Jonathon-Hirschi-CV/main.tex
+
+cp /private/tmp/jh-cv-build/main.pdf \
+  /Users/hirschij/Documents/Projects/jh-206.github.io/assets/cv/Jonathon-Hirschi-CV.pdf
+
+python3 scripts/render_site.py
+```
