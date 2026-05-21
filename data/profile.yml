@@ -32,3 +32,9 @@ skills_and_interests:
   - environmental science
   - wildfire applications
   - fuel moisture content
+
+cv:
+  title: Curriculum Vitae
+  pdf_path: assets/cv/Jonathon-Hirschi-CV.pdf
+  source_repository: jh-206/Jonathon-Hirschi-CV
+  source_note: CV source is maintained separately in the Overleaf/GitHub project.

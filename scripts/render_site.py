@@ -128,6 +128,23 @@ def html_list(items: list[str]) -> str:
     return "\n".join(f"          <li>{escape(str(item))}</li>" for item in items)
 
 
+def render_cv_section(cv: dict[str, Any]) -> str:
+    title = str(cv.get("title", "Curriculum Vitae"))
+    pdf_path = str(cv.get("pdf_path", ""))
+    source_note = str(cv.get("source_note", ""))
+
+    if not pdf_path:
+        return ""
+
+    note_html = f'\n      <p class="muted">{escape(source_note)}</p>' if source_note else ""
+    return f"""
+    <section>
+      <h2>{escape(title)}</h2>
+      <p><a class="download-link" href="{escape(pdf_path)}">Download CV PDF</a></p>{note_html}
+    </section>
+"""
+
+
 def render(profile: dict[str, Any]) -> str:
     name = str(profile.get("name", ""))
     username = str(profile.get("public_username", ""))
@@ -136,6 +153,7 @@ def render(profile: dict[str, Any]) -> str:
     advisor = profile.get("advisor", {})
     education = profile.get("education", [])
     interests = profile.get("skills_and_interests", [])
+    cv = profile.get("cv", {})
 
     title = str(position.get("title", ""))
     department = str(position.get("department", ""))
@@ -236,6 +254,10 @@ def render(profile: dict[str, Any]) -> str:
     .muted {{
       color: var(--muted);
     }}
+
+    .download-link {{
+      font-weight: 700;
+    }}
   </style>
 </head>
 <body>
@@ -246,6 +268,7 @@ def render(profile: dict[str, Any]) -> str:
       <p>{escape(position_line)}</p>
       <p><a href="{escape(site_url)}">{escape(username)}</a></p>
     </header>
+{render_cv_section(cv)}
 
     <section>
       <h2>Education</h2>
