@@ -124,23 +124,93 @@ def load_yaml(path: Path) -> dict[str, Any]:
     return data
 
 
-def html_list(items: list[str]) -> str:
-    return "\n".join(f"          <li>{escape(str(item))}</li>" for item in items)
+def as_mapping(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
 
 
-def render_cv_section(cv: dict[str, Any]) -> str:
-    title = str(cv.get("title", "Curriculum Vitae"))
-    pdf_path = str(cv.get("pdf_path", ""))
-    source_note = str(cv.get("source_note", ""))
+def as_list(value: Any) -> list[Any]:
+    return value if isinstance(value, list) else []
 
-    if not pdf_path:
+
+def link(label: str, url: str, class_name: str = "") -> str:
+    class_attr = f' class="{escape(class_name)}"' if class_name else ""
+    return f'<a{class_attr} href="{escape(url)}">{escape(label)}</a>'
+
+
+def compact_list(items: list[Any]) -> str:
+    return "\n".join(f"        <li>{escape(str(item))}</li>" for item in items)
+
+
+def render_link_row(profile: dict[str, Any]) -> str:
+    links = []
+    cv = as_mapping(profile.get("cv"))
+    if cv.get("pdf_path"):
+        links.append(link("CV", str(cv["pdf_path"])))
+    for item in as_list(profile.get("links")):
+        item = as_mapping(item)
+        label = str(item.get("label", ""))
+        url = str(item.get("url", ""))
+        if label and url:
+            links.append(link(label, url))
+    if not links:
         return ""
+    return "\n      ".join(links)
 
-    note_html = f'\n      <p class="muted">{escape(source_note)}</p>' if source_note else ""
+
+def render_education(items: list[Any]) -> str:
+    rows = []
+    for item in items:
+        item = as_mapping(item)
+        degree = str(item.get("degree", ""))
+        field = str(item.get("field", ""))
+        department = str(item.get("department", ""))
+        institution = str(item.get("institution", ""))
+        year = str(item.get("year", ""))
+        credential = ", ".join(part for part in [degree, field] if part)
+        details = ", ".join(part for part in [department, institution] if part)
+        year_html = f'<span class="date">{escape(year)}</span>' if year else ""
+        rows.append(
+            f"""        <li>
+          <span><strong>{escape(credential)}</strong>{", " if details else ""}{escape(details)}</span>
+          {year_html}
+        </li>"""
+        )
+    return "\n".join(rows)
+
+
+def render_advisor(advisor: dict[str, Any]) -> str:
+    name = str(advisor.get("name", ""))
+    website = str(advisor.get("website", ""))
+    if not name:
+        return ""
+    advisor_html = link(name, website) if website else escape(name)
     return f"""
     <section>
-      <h2>{escape(title)}</h2>
-      <p><a class="download-link" href="{escape(pdf_path)}">Download CV PDF</a></p>{note_html}
+      <h2>Advisor</h2>
+      <p>{advisor_html}</p>
+    </section>
+"""
+
+
+def render_other_activities(items: list[Any]) -> str:
+    if not items:
+        return ""
+    rows = []
+    for item in items:
+        item = as_mapping(item)
+        role = str(item.get("role", ""))
+        organization = str(item.get("organization", ""))
+        description = str(item.get("description", ""))
+        url = str(item.get("url", ""))
+        title = ", ".join(part for part in [role, organization] if part)
+        title_html = link(title, url) if url else escape(title)
+        rows.append(f"        <li><strong>{title_html}</strong>. {escape(description)}</li>")
+    return f"""
+    <section>
+      <h2>Other</h2>
+      <ul>
+{chr(10).join(rows)}
+      </ul>
     </section>
 """
 
@@ -148,31 +218,18 @@ def render_cv_section(cv: dict[str, Any]) -> str:
 def render(profile: dict[str, Any]) -> str:
     name = str(profile.get("name", ""))
     username = str(profile.get("public_username", ""))
-    site_url = str(profile.get("site_url", ""))
-    position = profile.get("current_position", {})
-    advisor = profile.get("advisor", {})
-    education = profile.get("education", [])
-    interests = profile.get("skills_and_interests", [])
-    cv = profile.get("cv", {})
+    position = as_mapping(profile.get("current_position"))
+    advisor = as_mapping(profile.get("advisor"))
+    education = as_list(profile.get("education"))
+    interests = as_list(profile.get("skills_and_interests"))
+    other_activities = as_list(profile.get("other_activities"))
+    research_summary = str(profile.get("research_summary", ""))
 
     title = str(position.get("title", ""))
     department = str(position.get("department", ""))
     institution = str(position.get("institution", ""))
-    position_line = ", ".join(part for part in [title, department, institution] if part)
-
-    education_items = []
-    for item in education:
-        degree = str(item.get("degree", ""))
-        field = str(item.get("field", ""))
-        edu_department = str(item.get("department", ""))
-        edu_institution = str(item.get("institution", ""))
-        year = str(item.get("year", ""))
-        credential = " in ".join(part for part in [degree, field] if part)
-        details = ", ".join(part for part in [edu_department, edu_institution, year] if part)
-        education_items.append(f"{credential}, {details}" if details else credential)
-
-    advisor_name = str(advisor.get("name", ""))
-    advisor_website = str(advisor.get("website", ""))
+    affiliation = ", ".join(part for part in [department, institution] if part)
+    position_line = ", ".join(part for part in [title, affiliation] if part)
 
     return f"""<!doctype html>
 <!-- Generated from data/profile.yml by scripts/render_site.py. -->
@@ -184,11 +241,11 @@ def render(profile: dict[str, Any]) -> str:
   <style>
     :root {{
       color-scheme: light;
-      --bg: #f8f7f3;
-      --text: #1f2a2e;
-      --muted: #5d686d;
-      --accent: #0d6b70;
-      --rule: #d8d2c6;
+      --bg: #ffffff;
+      --text: #222222;
+      --muted: #666666;
+      --accent: #2369a3;
+      --rule: #dddddd;
     }}
 
     * {{
@@ -200,99 +257,157 @@ def render(profile: dict[str, Any]) -> str:
       background: var(--bg);
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      line-height: 1.6;
+      font-size: 17px;
+      line-height: 1.62;
     }}
 
     main {{
-      width: min(760px, calc(100% - 32px));
+      width: min(820px, calc(100% - 32px));
       margin: 0 auto;
-      padding: 64px 0;
+      padding: 56px 0 72px;
     }}
 
     header {{
-      padding-bottom: 32px;
+      padding-bottom: 24px;
       border-bottom: 1px solid var(--rule);
-    }}
-
-    .eyebrow {{
-      margin: 0 0 8px;
-      color: var(--accent);
-      font-size: 0.9rem;
-      font-weight: 700;
-      text-transform: uppercase;
     }}
 
     h1 {{
       margin: 0;
-      font-size: 2.6rem;
-      line-height: 1.1;
+      font-size: 2.25rem;
+      line-height: 1.15;
+      font-weight: 650;
+      letter-spacing: 0;
     }}
 
     h2 {{
-      margin: 0 0 12px;
-      font-size: 1.1rem;
+      margin: 0 0 10px;
+      font-size: 1.15rem;
+      font-weight: 650;
+      letter-spacing: 0;
     }}
 
     p {{
-      margin: 12px 0 0;
+      margin: 10px 0 0;
     }}
 
     a {{
       color: var(--accent);
+      text-decoration: none;
+    }}
+
+    a:hover {{
+      text-decoration: underline;
     }}
 
     section {{
-      padding: 28px 0;
+      padding: 24px 0;
       border-bottom: 1px solid var(--rule);
     }}
 
     ul {{
       margin: 0;
-      padding-left: 20px;
+      padding-left: 22px;
     }}
 
+    li + li {{
+      margin-top: 8px;
+    }}
+
+    .affiliation {{
+      color: var(--muted);
+      font-size: 1.02rem;
+    }}
+
+    .links {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 14px;
+      margin-top: 16px;
+      font-weight: 600;
+    }}
+
+    .links a::after {{
+      color: var(--muted);
+      content: " /";
+      font-weight: 400;
+      margin-left: 14px;
+    }}
+
+    .links a:last-child::after {{
+      content: "";
+      margin-left: 0;
+    }}
+
+    .summary {{
+      max-width: 720px;
+    }}
+
+    .education-list {{
+      display: grid;
+      gap: 10px;
+      list-style: none;
+      padding-left: 0;
+    }}
+
+    .education-list li {{
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: baseline;
+    }}
+
+    .date,
     .muted {{
       color: var(--muted);
     }}
 
-    .download-link {{
-      font-weight: 700;
+    @media (max-width: 620px) {{
+      main {{
+        padding-top: 36px;
+      }}
+
+      h1 {{
+        font-size: 1.9rem;
+      }}
+
+      .education-list li {{
+        grid-template-columns: 1fr;
+        gap: 2px;
+      }}
     }}
   </style>
 </head>
 <body>
   <main>
     <header>
-      <p class="eyebrow">Personal website</p>
       <h1>{escape(name)}</h1>
-      <p>{escape(position_line)}</p>
-      <p><a href="{escape(site_url)}">{escape(username)}</a></p>
+      <p class="affiliation">{escape(position_line)}</p>
+      <nav class="links" aria-label="Profile links">
+      {render_link_row(profile)}
+      </nav>
     </header>
-{render_cv_section(cv)}
+
+    <section>
+      <h2>About</h2>
+      <p class="summary">{escape(research_summary)}</p>
+    </section>
+
+    <section>
+      <h2>Research Interests</h2>
+      <ul>
+{compact_list(interests)}
+      </ul>
+    </section>
 
     <section>
       <h2>Education</h2>
-      <ul>
-{html_list(education_items)}
+      <ul class="education-list">
+{render_education(education)}
       </ul>
     </section>
-
-    <section>
-      <h2>Advisor</h2>
-      <p><a href="{escape(advisor_website)}">{escape(advisor_name)}</a></p>
-    </section>
-
-    <section>
-      <h2>Skills and Interests</h2>
-      <ul>
-{html_list(interests)}
-      </ul>
-    </section>
-
-    <section>
-      <h2>About This Site</h2>
-      <p class="muted">This site is generated from a small public profile file and will grow over time.</p>
-    </section>
+{render_advisor(advisor)}
+{render_other_activities(other_activities)}
   </main>
 </body>
 </html>

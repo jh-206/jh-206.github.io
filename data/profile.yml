@@ -11,6 +11,8 @@ current_position:
   department: Mathematical & Statistical Sciences
   institution: University of Colorado Denver
 
+research_summary: I develop machine learning and time series methods for environmental science, with emphasis on wildfire applications and fuel moisture content prediction.
+
 education:
   - degree: PhD
     field: Applied Mathematics
@@ -27,11 +29,25 @@ advisor:
   name: Jan Mandel
   website: https://janmandel.github.io/public/
 
+links:
+  - label: Google Scholar
+    url: https://scholar.google.com/citations?user=nfL2xqIAAAAJ&hl=en&oi=ao
+  - label: ORCID
+    url: https://orcid.org/0009-0009-5483-811X
+  - label: GitHub
+    url: https://github.com/jh-206
+
 skills_and_interests:
   - machine learning research
   - environmental science
   - wildfire applications
   - fuel moisture content
+
+other_activities:
+  - role: Board member
+    organization: Swim for the Salmon
+    description: Fundraiser for water quality nonprofits that organizes a swim across Lake Washington.
+    url: https://www.facebook.com/swimforthesalmon/
 
 cv:
   title: Curriculum Vitae

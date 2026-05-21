@@ -8,11 +8,11 @@
   <style>
     :root {
       color-scheme: light;
-      --bg: #f8f7f3;
-      --text: #1f2a2e;
-      --muted: #5d686d;
-      --accent: #0d6b70;
-      --rule: #d8d2c6;
+      --bg: #ffffff;
+      --text: #222222;
+      --muted: #666666;
+      --accent: #2369a3;
+      --rule: #dddddd;
     }
 
     * {
@@ -24,87 +24,166 @@
       background: var(--bg);
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      line-height: 1.6;
+      font-size: 17px;
+      line-height: 1.62;
     }
 
     main {
-      width: min(760px, calc(100% - 32px));
+      width: min(820px, calc(100% - 32px));
       margin: 0 auto;
-      padding: 64px 0;
+      padding: 56px 0 72px;
     }
 
     header {
-      padding-bottom: 32px;
+      padding-bottom: 24px;
       border-bottom: 1px solid var(--rule);
-    }
-
-    .eyebrow {
-      margin: 0 0 8px;
-      color: var(--accent);
-      font-size: 0.9rem;
-      font-weight: 700;
-      text-transform: uppercase;
     }
 
     h1 {
       margin: 0;
-      font-size: 2.6rem;
-      line-height: 1.1;
+      font-size: 2.25rem;
+      line-height: 1.15;
+      font-weight: 650;
+      letter-spacing: 0;
     }
 
     h2 {
-      margin: 0 0 12px;
-      font-size: 1.1rem;
+      margin: 0 0 10px;
+      font-size: 1.15rem;
+      font-weight: 650;
+      letter-spacing: 0;
     }
 
     p {
-      margin: 12px 0 0;
+      margin: 10px 0 0;
     }
 
     a {
       color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
     }
 
     section {
-      padding: 28px 0;
+      padding: 24px 0;
       border-bottom: 1px solid var(--rule);
     }
 
     ul {
       margin: 0;
-      padding-left: 20px;
+      padding-left: 22px;
     }
 
+    li + li {
+      margin-top: 8px;
+    }
+
+    .affiliation {
+      color: var(--muted);
+      font-size: 1.02rem;
+    }
+
+    .links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 14px;
+      margin-top: 16px;
+      font-weight: 600;
+    }
+
+    .links a::after {
+      color: var(--muted);
+      content: " /";
+      font-weight: 400;
+      margin-left: 14px;
+    }
+
+    .links a:last-child::after {
+      content: "";
+      margin-left: 0;
+    }
+
+    .summary {
+      max-width: 720px;
+    }
+
+    .education-list {
+      display: grid;
+      gap: 10px;
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .education-list li {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: baseline;
+    }
+
+    .date,
     .muted {
       color: var(--muted);
     }
 
-    .download-link {
-      font-weight: 700;
+    @media (max-width: 620px) {
+      main {
+        padding-top: 36px;
+      }
+
+      h1 {
+        font-size: 1.9rem;
+      }
+
+      .education-list li {
+        grid-template-columns: 1fr;
+        gap: 2px;
+      }
     }
   </style>
 </head>
 <body>
   <main>
     <header>
-      <p class="eyebrow">Personal website</p>
       <h1>Jonathon Hirschi</h1>
-      <p>Researcher, Mathematical &amp; Statistical Sciences, University of Colorado Denver</p>
-      <p><a href="https://jh-206.github.io">jh-206</a></p>
+      <p class="affiliation">Researcher, Mathematical &amp; Statistical Sciences, University of Colorado Denver</p>
+      <nav class="links" aria-label="Profile links">
+      <a href="assets/cv/Jonathon-Hirschi-CV.pdf">CV</a>
+      <a href="https://scholar.google.com/citations?user=nfL2xqIAAAAJ&amp;hl=en&amp;oi=ao">Google Scholar</a>
+      <a href="https://orcid.org/0009-0009-5483-811X">ORCID</a>
+      <a href="https://github.com/jh-206">GitHub</a>
+      </nav>
     </header>
 
     <section>
-      <h2>Curriculum Vitae</h2>
-      <p><a class="download-link" href="assets/cv/Jonathon-Hirschi-CV.pdf">Download CV PDF</a></p>
-      <p class="muted">CV source is maintained separately in the Overleaf/GitHub project.</p>
+      <h2>About</h2>
+      <p class="summary">I develop machine learning and time series methods for environmental science, with emphasis on wildfire applications and fuel moisture content prediction.</p>
     </section>
 
+    <section>
+      <h2>Research Interests</h2>
+      <ul>
+        <li>machine learning research</li>
+        <li>environmental science</li>
+        <li>wildfire applications</li>
+        <li>fuel moisture content</li>
+      </ul>
+    </section>
 
     <section>
       <h2>Education</h2>
-      <ul>
-          <li>PhD in Applied Mathematics, Mathematical &amp; Statistical Sciences, University of Colorado Denver, 2026</li>
-          <li>MS in Statistics, Mathematical &amp; Statistical Sciences, University of Colorado Denver, 2024</li>
+      <ul class="education-list">
+        <li>
+          <span><strong>PhD, Applied Mathematics</strong>, Mathematical &amp; Statistical Sciences, University of Colorado Denver</span>
+          <span class="date">2026</span>
+        </li>
+        <li>
+          <span><strong>MS, Statistics</strong>, Mathematical &amp; Statistical Sciences, University of Colorado Denver</span>
+          <span class="date">2024</span>
+        </li>
       </ul>
     </section>
 
@@ -113,20 +192,14 @@
       <p><a href="https://janmandel.github.io/public/">Jan Mandel</a></p>
     </section>
 
+
     <section>
-      <h2>Skills and Interests</h2>
+      <h2>Other</h2>
       <ul>
-          <li>machine learning research</li>
-          <li>environmental science</li>
-          <li>wildfire applications</li>
-          <li>fuel moisture content</li>
+        <li><strong><a href="https://www.facebook.com/swimforthesalmon/">Board member, Swim for the Salmon</a></strong>. Fundraiser for water quality nonprofits that organizes a swim across Lake Washington.</li>
       </ul>
     </section>
 
-    <section>
-      <h2>About This Site</h2>
-      <p class="muted">This site is generated from a small public profile file and will grow over time.</p>
-    </section>
   </main>
 </body>
 </html>
