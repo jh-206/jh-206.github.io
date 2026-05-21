@@ -1,0 +1,34 @@
+name: Jonathon Hirschi
+public_username: jh-206
+site_url: https://jh-206.github.io
+
+alternative_usernames:
+  - username: jonathonHir
+    context: University of Colorado Denver Alderaan supercomputing cluster
+
+current_position:
+  title: Researcher
+  department: Mathematical & Statistical Sciences
+  institution: University of Colorado Denver
+
+education:
+  - degree: PhD
+    field: Applied Mathematics
+    department: Mathematical & Statistical Sciences
+    institution: University of Colorado Denver
+    year: 2026
+  - degree: MS
+    field: Statistics
+    department: Mathematical & Statistical Sciences
+    institution: University of Colorado Denver
+    year: 2024
+
+advisor:
+  name: Jan Mandel
+  website: https://janmandel.github.io/public/
+
+skills_and_interests:
+  - machine learning research
+  - environmental science
+  - wildfire applications
+  - fuel moisture content
