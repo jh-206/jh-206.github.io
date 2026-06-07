@@ -141,6 +141,18 @@ def compact_list(items: list[Any]) -> str:
     return "\n".join(f"        <li>{escape(str(item))}</li>" for item in items)
 
 
+def render_tags(items: list[Any]) -> str:
+    return "\n".join(f"        <li>{escape(str(item))}</li>" for item in items)
+
+
+def find_profile_link(profile: dict[str, Any], label: str) -> dict[str, Any]:
+    for item in as_list(profile.get("links")):
+        item = as_mapping(item)
+        if str(item.get("label", "")).lower() == label.lower():
+            return item
+    return {}
+
+
 def render_link_row(profile: dict[str, Any]) -> str:
     links = []
     cv = as_mapping(profile.get("cv"))
@@ -185,18 +197,55 @@ def render_advisor(advisor: dict[str, Any]) -> str:
         return ""
     advisor_html = link(name, website) if website else escape(name)
     return f"""
-    <section>
+    <section class="section-row">
       <h2>Advisor</h2>
-      <p>{advisor_html}</p>
+      <div>
+        <p>{advisor_html}</p>
+      </div>
     </section>
 """
 
 
-def render_featured_links(items: list[Any]) -> str:
-    if not items:
-        return ""
-    rows = []
-    for item in items:
+def render_featured_card(
+    title: str,
+    meta: str,
+    description: str,
+    url: str,
+    action_label: str,
+    secondary_links: list[str] | None = None,
+    detail: str = "",
+) -> str:
+    secondary_links = secondary_links or []
+    detail_html = f'\n          <p class="card-detail">{escape(detail)}</p>' if detail else ""
+    secondary_html = (
+        f'\n          <p class="secondary-links">{" ".join(secondary_links)}</p>'
+        if secondary_links
+        else ""
+    )
+    action_html = link(action_label, url, "card-action") if url else ""
+    return f"""        <article class="feature-card">
+          <p class="card-meta">{escape(meta)}</p>
+          <h3>{escape(title)}</h3>{detail_html}
+          <p>{escape(description)}</p>
+          <p>{action_html}</p>{secondary_html}
+        </article>"""
+
+
+def render_featured_cards(profile: dict[str, Any]) -> str:
+    cards = []
+    cv = as_mapping(profile.get("cv"))
+    if cv.get("pdf_path"):
+        cards.append(
+            render_featured_card(
+                "Curriculum Vitae",
+                "PDF",
+                "Current academic CV.",
+                str(cv["pdf_path"]),
+                "Download CV",
+            )
+        )
+
+    for item in as_list(profile.get("featured_links")):
         item = as_mapping(item)
         title = str(item.get("title", ""))
         item_type = str(item.get("type", "")).title()
@@ -207,9 +256,13 @@ def render_featured_links(items: list[Any]) -> str:
         description = str(item.get("description", ""))
         secondary_links = []
 
-        title_html = link(title, url) if url else escape(title)
         meta = " / ".join(part for part in [item_type, year] if part)
         detail = " / ".join(part for part in [dates, venue] if part)
+        action_label = "Open link"
+        if item_type.lower() == "talk":
+            action_label = "Watch video"
+        elif item_type.lower() == "recognition":
+            action_label = "Read report"
 
         for secondary in as_list(item.get("secondary_links")):
             secondary = as_mapping(secondary)
@@ -218,24 +271,42 @@ def render_featured_links(items: list[Any]) -> str:
             if label and secondary_url:
                 secondary_links.append(link(label, secondary_url))
 
-        detail_html = f'\n          <p class="muted">{escape(detail)}</p>' if detail else ""
-        description_html = f'\n          <p>{escape(description)}</p>' if description else ""
-        secondary_html = (
-            f'\n          <p class="secondary-links">{" ".join(secondary_links)}</p>'
-            if secondary_links
-            else ""
+        cards.append(
+            render_featured_card(
+                title,
+                meta,
+                description,
+                url,
+                action_label,
+                secondary_links,
+                detail,
+            )
         )
-        rows.append(
-            f"""        <li>
-          <p><strong>{title_html}</strong>{f' <span class="date">{escape(meta)}</span>' if meta else ''}</p>{detail_html}{description_html}{secondary_html}
-        </li>"""
+
+    scholar = find_profile_link(profile, "Google Scholar")
+    if scholar:
+        cards.append(
+            render_featured_card(
+                "Google Scholar",
+                "Profile",
+                "Publication and citation profile.",
+                str(scholar.get("url", "")),
+                "View profile",
+            )
         )
+
+    if not cards:
+        return ""
+
     return f"""
-    <section>
-      <h2>Selected Recognition and Talks</h2>
-      <ul class="featured-list">
-{chr(10).join(rows)}
-      </ul>
+    <section class="featured-section">
+      <div class="section-heading">
+        <h2>Featured</h2>
+        <p>Selected profile links, recognition, and talks.</p>
+      </div>
+      <div class="feature-grid">
+{chr(10).join(cards)}
+      </div>
     </section>
 """
 
@@ -254,11 +325,13 @@ def render_other_activities(items: list[Any]) -> str:
         title_html = link(title, url) if url else escape(title)
         rows.append(f"        <li><strong>{title_html}</strong>. {escape(description)}</li>")
     return f"""
-    <section>
+    <section class="section-row">
       <h2>Other</h2>
-      <ul>
+      <div>
+        <ul>
 {chr(10).join(rows)}
-      </ul>
+        </ul>
+      </div>
     </section>
 """
 
@@ -270,7 +343,6 @@ def render(profile: dict[str, Any]) -> str:
     advisor = as_mapping(profile.get("advisor"))
     education = as_list(profile.get("education"))
     interests = as_list(profile.get("skills_and_interests"))
-    featured_links = as_list(profile.get("featured_links"))
     other_activities = as_list(profile.get("other_activities"))
     research_summary = str(profile.get("research_summary", ""))
 
@@ -291,10 +363,13 @@ def render(profile: dict[str, Any]) -> str:
     :root {{
       color-scheme: light;
       --bg: #ffffff;
-      --text: #222222;
-      --muted: #666666;
-      --accent: #2369a3;
-      --rule: #dddddd;
+      --band: #f5f9f8;
+      --card: #ffffff;
+      --text: #223036;
+      --muted: #667276;
+      --accent: #146c78;
+      --warm: #8a5a12;
+      --rule: #dbe2e2;
     }}
 
     * {{
@@ -307,33 +382,49 @@ def render(profile: dict[str, Any]) -> str:
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       font-size: 17px;
-      line-height: 1.62;
+      line-height: 1.6;
+    }}
+
+    .wrap {{
+      width: min(980px, calc(100% - 32px));
+      margin: 0 auto;
+    }}
+
+    .site-header {{
+      background: var(--band);
+      border-top: 6px solid var(--accent);
+      border-bottom: 1px solid var(--rule);
+    }}
+
+    .hero {{
+      display: grid;
+      gap: 22px;
+      padding: 44px 0 34px;
     }}
 
     main {{
-      width: min(820px, calc(100% - 32px));
-      margin: 0 auto;
-      padding: 56px 0 72px;
-    }}
-
-    header {{
-      padding-bottom: 24px;
-      border-bottom: 1px solid var(--rule);
+      padding: 28px 0 72px;
     }}
 
     h1 {{
       margin: 0;
-      font-size: 2.25rem;
+      font-size: clamp(2rem, 4vw, 3rem);
       line-height: 1.15;
-      font-weight: 650;
+      font-weight: 700;
       letter-spacing: 0;
     }}
 
     h2 {{
       margin: 0 0 10px;
-      font-size: 1.15rem;
+      font-size: 1.1rem;
       font-weight: 650;
       letter-spacing: 0;
+    }}
+
+    h3 {{
+      margin: 6px 0 0;
+      font-size: 1.05rem;
+      line-height: 1.35;
     }}
 
     p {{
@@ -350,7 +441,7 @@ def render(profile: dict[str, Any]) -> str:
     }}
 
     section {{
-      padding: 24px 0;
+      padding: 26px 0;
       border-bottom: 1px solid var(--rule);
     }}
 
@@ -363,6 +454,15 @@ def render(profile: dict[str, Any]) -> str:
       margin-top: 8px;
     }}
 
+    .kicker {{
+      color: var(--warm);
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      margin: 0 0 8px;
+      text-transform: uppercase;
+    }}
+
     .affiliation {{
       color: var(--muted);
       font-size: 1.02rem;
@@ -372,7 +472,7 @@ def render(profile: dict[str, Any]) -> str:
       display: flex;
       flex-wrap: wrap;
       gap: 6px 14px;
-      margin-top: 16px;
+      margin-top: 18px;
       font-weight: 600;
     }}
 
@@ -390,16 +490,106 @@ def render(profile: dict[str, Any]) -> str:
 
     .summary {{
       max-width: 720px;
+      font-size: 1.08rem;
+    }}
+
+    .focus-band {{
+      align-items: baseline;
+      border-bottom: 1px solid var(--rule);
+      display: grid;
+      gap: 16px;
+      grid-template-columns: 180px minmax(0, 1fr);
+      padding: 22px 0;
+    }}
+
+    .tag-list {{
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      list-style: none;
+      padding-left: 0;
+    }}
+
+    .tag-list li {{
+      align-items: center;
+      background: #eef6f4;
+      border: 1px solid #c9ddda;
+      border-radius: 8px;
+      color: #24484c;
+      display: flex;
+      font-size: 0.94rem;
+      justify-content: center;
+      line-height: 1.3;
+      min-height: 42px;
+      padding: 8px 10px;
+      text-align: center;
+    }}
+
+    .featured-section {{
+      padding: 30px 0;
+    }}
+
+    .section-heading {{
+      align-items: baseline;
+      display: flex;
+      gap: 16px;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }}
+
+    .section-heading p {{
+      color: var(--muted);
+      margin: 0;
+    }}
+
+    .feature-grid {{
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }}
+
+    .feature-card {{
+      background: var(--card);
+      border: 1px solid var(--rule);
+      border-radius: 8px;
+      padding: 18px;
+    }}
+
+    .feature-card p {{
+      margin-top: 8px;
+    }}
+
+    .card-meta {{
+      color: var(--warm);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      margin: 0;
+      text-transform: uppercase;
+    }}
+
+    .card-detail {{
+      color: var(--muted);
+      font-size: 0.94rem;
+    }}
+
+    .card-action {{
+      font-weight: 700;
+    }}
+
+    .secondary-links {{
+      font-weight: 600;
+    }}
+
+    .section-row {{
+      display: grid;
+      gap: 24px;
+      grid-template-columns: 180px minmax(0, 1fr);
     }}
 
     .education-list {{
       display: grid;
       gap: 10px;
-      list-style: none;
-      padding-left: 0;
-    }}
-
-    .featured-list {{
       list-style: none;
       padding-left: 0;
     }}
@@ -411,30 +601,37 @@ def render(profile: dict[str, Any]) -> str:
       align-items: baseline;
     }}
 
-    .featured-list li + li {{
-      margin-top: 18px;
-    }}
-
-    .featured-list p {{
-      margin-top: 4px;
-    }}
-
-    .secondary-links {{
-      font-weight: 600;
-    }}
-
     .date,
     .muted {{
       color: var(--muted);
     }}
 
-    @media (max-width: 620px) {{
+    @media (max-width: 760px) {{
       main {{
-        padding-top: 36px;
+        padding-top: 18px;
       }}
 
       h1 {{
         font-size: 1.9rem;
+      }}
+
+      .focus-band,
+      .section-row {{
+        grid-template-columns: 1fr;
+      }}
+
+      .feature-grid {{
+        grid-template-columns: 1fr;
+      }}
+
+      .tag-list {{
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }}
+
+      .section-heading {{
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 4px;
       }}
 
       .education-list li {{
@@ -445,33 +642,36 @@ def render(profile: dict[str, Any]) -> str:
   </style>
 </head>
 <body>
-  <main>
-    <header>
+  <header class="site-header">
+    <div class="wrap hero">
+      <div>
+        <p class="kicker">Academic website</p>
       <h1>{escape(name)}</h1>
       <p class="affiliation">{escape(position_line)}</p>
+        <p class="summary">{escape(research_summary)}</p>
       <nav class="links" aria-label="Profile links">
       {render_link_row(profile)}
       </nav>
-    </header>
+      </div>
+    </div>
+  </header>
 
-    <section>
-      <h2>About</h2>
-      <p class="summary">{escape(research_summary)}</p>
-    </section>
-
-    <section>
-      <h2>Research Interests</h2>
-      <ul>
-{compact_list(interests)}
+  <main class="wrap">
+    <section class="focus-band" aria-label="Research focus">
+      <h2>Research Focus</h2>
+      <ul class="tag-list">
+{render_tags(interests)}
       </ul>
     </section>
-{render_featured_links(featured_links)}
+{render_featured_cards(profile)}
 
-    <section>
+    <section class="section-row">
       <h2>Education</h2>
-      <ul class="education-list">
+      <div>
+        <ul class="education-list">
 {render_education(education)}
-      </ul>
+        </ul>
+      </div>
     </section>
 {render_advisor(advisor)}
 {render_other_activities(other_activities)}
