@@ -192,6 +192,54 @@ def render_advisor(advisor: dict[str, Any]) -> str:
 """
 
 
+def render_featured_links(items: list[Any]) -> str:
+    if not items:
+        return ""
+    rows = []
+    for item in items:
+        item = as_mapping(item)
+        title = str(item.get("title", ""))
+        item_type = str(item.get("type", "")).title()
+        year = str(item.get("year", ""))
+        dates = str(item.get("dates", ""))
+        venue = str(item.get("venue", ""))
+        url = str(item.get("url", ""))
+        description = str(item.get("description", ""))
+        secondary_links = []
+
+        title_html = link(title, url) if url else escape(title)
+        meta = " / ".join(part for part in [item_type, year] if part)
+        detail = " / ".join(part for part in [dates, venue] if part)
+
+        for secondary in as_list(item.get("secondary_links")):
+            secondary = as_mapping(secondary)
+            label = str(secondary.get("label", ""))
+            secondary_url = str(secondary.get("url", ""))
+            if label and secondary_url:
+                secondary_links.append(link(label, secondary_url))
+
+        detail_html = f'\n          <p class="muted">{escape(detail)}</p>' if detail else ""
+        description_html = f'\n          <p>{escape(description)}</p>' if description else ""
+        secondary_html = (
+            f'\n          <p class="secondary-links">{" ".join(secondary_links)}</p>'
+            if secondary_links
+            else ""
+        )
+        rows.append(
+            f"""        <li>
+          <p><strong>{title_html}</strong>{f' <span class="date">{escape(meta)}</span>' if meta else ''}</p>{detail_html}{description_html}{secondary_html}
+        </li>"""
+        )
+    return f"""
+    <section>
+      <h2>Selected Recognition and Talks</h2>
+      <ul class="featured-list">
+{chr(10).join(rows)}
+      </ul>
+    </section>
+"""
+
+
 def render_other_activities(items: list[Any]) -> str:
     if not items:
         return ""
@@ -222,6 +270,7 @@ def render(profile: dict[str, Any]) -> str:
     advisor = as_mapping(profile.get("advisor"))
     education = as_list(profile.get("education"))
     interests = as_list(profile.get("skills_and_interests"))
+    featured_links = as_list(profile.get("featured_links"))
     other_activities = as_list(profile.get("other_activities"))
     research_summary = str(profile.get("research_summary", ""))
 
@@ -350,11 +399,28 @@ def render(profile: dict[str, Any]) -> str:
       padding-left: 0;
     }}
 
+    .featured-list {{
+      list-style: none;
+      padding-left: 0;
+    }}
+
     .education-list li {{
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 16px;
       align-items: baseline;
+    }}
+
+    .featured-list li + li {{
+      margin-top: 18px;
+    }}
+
+    .featured-list p {{
+      margin-top: 4px;
+    }}
+
+    .secondary-links {{
+      font-weight: 600;
     }}
 
     .date,
@@ -399,6 +465,7 @@ def render(profile: dict[str, Any]) -> str:
 {compact_list(interests)}
       </ul>
     </section>
+{render_featured_links(featured_links)}
 
     <section>
       <h2>Education</h2>

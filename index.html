@@ -117,11 +117,28 @@
       padding-left: 0;
     }
 
+    .featured-list {
+      list-style: none;
+      padding-left: 0;
+    }
+
     .education-list li {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 16px;
       align-items: baseline;
+    }
+
+    .featured-list li + li {
+      margin-top: 18px;
+    }
+
+    .featured-list p {
+      margin-top: 4px;
+    }
+
+    .secondary-links {
+      font-weight: 600;
     }
 
     .date,
@@ -172,6 +189,23 @@
         <li>fuel moisture content</li>
       </ul>
     </section>
+
+    <section>
+      <h2>Selected Recognition and Talks</h2>
+      <ul class="featured-list">
+        <li>
+          <p><strong><a href="https://esto.nasa.gov/files/AnnualReports/ESTO_Annual_Report_2024.pdf">NASA ESTO Annual Report Student Spotlight</a></strong> <span class="date">Recognition / 2024</span></p>
+          <p>Featured in a student spotlight in the NASA Earth Science Technology Office (ESTO) Annual Report.</p>
+        </li>
+        <li>
+          <p><strong><a href="https://www.youtube.com/watch?v=bdLcCgtoJzs">Transfer learning with recurrent neural networks of fuel moisture content</a></strong> <span class="date">Talk / 2025</span></p>
+          <p class="muted">November 3-7, 2025 / Workshop in Numerical Wildfires and AI Weather, Cargese, Corsica, France</p>
+          <p>Conference presentation on extending fuel moisture transfer learning from 10h fuels to 1h and 100h fuels.</p>
+          <p class="secondary-links"><a href="https://forefireapi.github.io/cargese2025/program/">Program</a></p>
+        </li>
+      </ul>
+    </section>
+
 
     <section>
       <h2>Education</h2>

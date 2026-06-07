@@ -43,6 +43,23 @@ skills_and_interests:
   - wildfire applications
   - fuel moisture content
 
+featured_links:
+  - title: NASA ESTO Annual Report Student Spotlight
+    type: recognition
+    year: 2024
+    url: https://esto.nasa.gov/files/AnnualReports/ESTO_Annual_Report_2024.pdf
+    description: Featured in a student spotlight in the NASA Earth Science Technology Office (ESTO) Annual Report.
+  - title: Transfer learning with recurrent neural networks of fuel moisture content
+    type: talk
+    year: 2025
+    dates: November 3-7, 2025
+    venue: Workshop in Numerical Wildfires and AI Weather, Cargese, Corsica, France
+    url: https://www.youtube.com/watch?v=bdLcCgtoJzs
+    description: Conference presentation on extending fuel moisture transfer learning from 10h fuels to 1h and 100h fuels.
+    secondary_links:
+      - label: Program
+        url: https://forefireapi.github.io/cargese2025/program/
+
 other_activities:
   - role: Board member
     organization: Swim for the Salmon
