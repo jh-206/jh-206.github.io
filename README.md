@@ -22,25 +22,26 @@ The CV source lives outside this repository in `Documents/Projects/Jonathon-Hirs
 
 The website publishes the compiled PDF at `assets/cv/Jonathon-Hirschi-CV.pdf`.
 
-1. Update the CV source from Overleaf.
-2. Compile `main.tex` to a PDF.
-3. Copy the PDF to `assets/cv/Jonathon-Hirschi-CV.pdf`.
-4. Run `python3 scripts/render_site.py`.
-5. Commit and push the website changes.
-
-Manual compile and copy commands:
+After pulling CV changes from Overleaf, update the website PDF and homepage with:
 
 ```sh
-mkdir -p /private/tmp/jh-cv-build
+cd /Users/hirschij/Documents/Projects/jh-206.github.io
+make site
+```
 
-latexmk -pdf \
-  -interaction=nonstopmode \
-  -halt-on-error \
-  -outdir=/private/tmp/jh-cv-build \
-  /Users/hirschij/Documents/Projects/Jonathon-Hirschi-CV/main.tex
+Then review, commit, and push the website changes:
 
-cp /private/tmp/jh-cv-build/main.pdf \
-  /Users/hirschij/Documents/Projects/jh-206.github.io/assets/cv/Jonathon-Hirschi-CV.pdf
+```sh
+git status
+git add assets/cv/Jonathon-Hirschi-CV.pdf index.html
+git commit -m "Update CV PDF"
+git push
+```
 
-python3 scripts/render_site.py
+Useful commands:
+
+```sh
+make cv      # compile and copy the CV PDF
+make render  # regenerate index.html
+make site    # compile/copy CV and regenerate index.html
 ```
