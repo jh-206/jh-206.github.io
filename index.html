@@ -252,6 +252,16 @@
       color: var(--muted);
     }
 
+    .site-footer {
+      color: var(--muted);
+      font-size: 0.9rem;
+      padding: 22px 0 40px;
+    }
+
+    .site-footer p {
+      margin: 0;
+    }
+
     @media (max-width: 760px) {
       main {
         padding-top: 18px;
@@ -319,7 +329,7 @@
     <section class="featured-section">
       <div class="section-heading">
         <h2>Featured</h2>
-        <p>Selected profile links, recognition, and talks.</p>
+        <p>Selected profile links, recognition, and invited talks.</p>
       </div>
       <div class="feature-grid">
         <article class="feature-card">
@@ -327,6 +337,12 @@
           <h3>Curriculum Vitae</h3>
           <p>Current academic CV.</p>
           <p><a class="card-action" href="assets/cv/Jonathon-Hirschi-CV.pdf">Download CV</a></p>
+        </article>
+        <article class="feature-card">
+          <p class="card-meta">Invited Talk / 2026</p>
+          <h3>Physically Informed Transfer Learning for Fuel Moisture Dynamics through Time-Warped Recurrent Neural Networks</h3>
+          <p class="card-detail">SIAM Conference on Mathematics of Planet Earth (MPE26), Cleveland, Ohio</p>
+          <p>Invited presentation in the minisymposium &quot;Mathematics in Wildfire: Leveraging Mathematical Expertise in a Changing Field.&quot;</p>
         </article>
         <article class="feature-card">
           <p class="card-meta">Recognition / 2024</p>
@@ -386,5 +402,9 @@
     </section>
 
   </main>
+
+  <footer class="wrap site-footer">
+    <p>Site generated from structured profile data with assistance from Codex.</p>
+  </footer>
 </body>
 </html>

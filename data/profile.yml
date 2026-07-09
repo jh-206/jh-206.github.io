@@ -44,6 +44,11 @@ skills_and_interests:
   - fuel moisture content
 
 featured_links:
+  - title: Physically Informed Transfer Learning for Fuel Moisture Dynamics through Time-Warped Recurrent Neural Networks
+    type: invited talk
+    year: 2026
+    venue: SIAM Conference on Mathematics of Planet Earth (MPE26), Cleveland, Ohio
+    description: 'Invited presentation in the minisymposium "Mathematics in Wildfire: Leveraging Mathematical Expertise in a Changing Field."'
   - title: NASA ESTO Annual Report Student Spotlight
     type: recognition
     year: 2024

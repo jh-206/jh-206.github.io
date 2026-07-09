@@ -222,12 +222,11 @@ def render_featured_card(
         if secondary_links
         else ""
     )
-    action_html = link(action_label, url, "card-action") if url else ""
+    action_html = f"\n          <p>{link(action_label, url, 'card-action')}</p>" if url else ""
     return f"""        <article class="feature-card">
           <p class="card-meta">{escape(meta)}</p>
           <h3>{escape(title)}</h3>{detail_html}
-          <p>{escape(description)}</p>
-          <p>{action_html}</p>{secondary_html}
+          <p>{escape(description)}</p>{action_html}{secondary_html}
         </article>"""
 
 
@@ -302,7 +301,7 @@ def render_featured_cards(profile: dict[str, Any]) -> str:
     <section class="featured-section">
       <div class="section-heading">
         <h2>Featured</h2>
-        <p>Selected profile links, recognition, and talks.</p>
+        <p>Selected profile links, recognition, and invited talks.</p>
       </div>
       <div class="feature-grid">
 {chr(10).join(cards)}
@@ -606,6 +605,16 @@ def render(profile: dict[str, Any]) -> str:
       color: var(--muted);
     }}
 
+    .site-footer {{
+      color: var(--muted);
+      font-size: 0.9rem;
+      padding: 22px 0 40px;
+    }}
+
+    .site-footer p {{
+      margin: 0;
+    }}
+
     @media (max-width: 760px) {{
       main {{
         padding-top: 18px;
@@ -676,6 +685,10 @@ def render(profile: dict[str, Any]) -> str:
 {render_advisor(advisor)}
 {render_other_activities(other_activities)}
   </main>
+
+  <footer class="wrap site-footer">
+    <p>Site generated from structured profile data with assistance from Codex.</p>
+  </footer>
 </body>
 </html>
 """
